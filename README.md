@@ -7,6 +7,7 @@ English | [简体中文](README_zh.md)
 ![Build Status](https://github.com/chen3feng/atomiccounter/actions/workflows/go.yml/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/chen3feng/atomiccounter/badge.svg?branch=master)](https://coveralls.io/github/chen3feng/atomiccounter?branch=master)
 [![GoReport](https://goreportcard.com/badge/github.com/securego/gosec)](https://goreportcard.com/report/github.com/chen3feng/atomiccounter)
+[![Go Reference](https://pkg.go.dev/badge/github.com/chen3feng/atomiccounter.svg)](https://pkg.go.dev/github.com/chen3feng/atomiccounter)
 
 A High Performance Atomic Counter for Concurrent Write-More-Read-Less Scenario in Go.
 

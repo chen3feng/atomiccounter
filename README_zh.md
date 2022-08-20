@@ -7,6 +7,7 @@
 ![Build Status](https://github.com/chen3feng/atomiccounter/actions/workflows/go.yml/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/chen3feng/atomiccounter/badge.svg?branch=master)](https://coveralls.io/github/chen3feng/atomiccounter?branch=master)
 [![GoReport](https://goreportcard.com/badge/github.com/securego/gosec)](https://goreportcard.com/report/github.com/chen3feng/atomiccounter)
+[![Go Reference](https://pkg.go.dev/badge/github.com/chen3feng/atomiccounter.svg)](https://pkg.go.dev/github.com/chen3feng/atomiccounter)
 
 本库实现了一个针对高并发写入进行性能优化的计数器。类似于 Java 里的 [LongAdder](https://segmentfault.com/a/1190000023761290)，
 [folly](https://github.com/facebook/folly) 里的 [ThreadCachedInt](https://github.com/facebook/folly/blob/main/folly/docs/ThreadCachedInt.md)，
