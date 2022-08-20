@@ -15,13 +15,36 @@ Similar to [LongAdder](https://docs.oracle.com/javase/8/docs/api/java/util/concu
 [ThreadCachedInt](https://github.com/facebook/folly/blob/main/folly/docs/ThreadCachedInt.md) in [folly](https://github.com/facebook/folly),
 In scenarios of high concurrent writes but few reads, it can provide dozens of times the write performance than `sync/atomic`.
 
-Benchmark(per 100 calls):
+## Benchmark
+
+per 100 calls.
+
+Under MacOS with M1 Pro:
 
 ```console
+goos: darwin
+goarch: arm64
+pkg: github.com/chen3feng/atomiccounter
 BenchmarkNonAtomicAdd-10        47337121                22.14 ns/op
 BenchmarkAtomicAdd-10             180942              6861 ns/op
 BenchmarkCounter-10             14871549                81.02 ns/op
 ```
+
+Under Linux:
+
+```console
+goos: linux
+goarch: amd64
+pkg: github.com/chen3feng/atomiccounter
+cpu: Intel(R) Xeon(R) Gold 6133 CPU @ 2.50GHz
+BenchmarkNonAtomicAdd-16    	 9508723	       135.3 ns/op
+BenchmarkAtomicAdd-16       	  582798	      2070 ns/op
+BenchmarkCounter-16         	 4748263	       263.1 ns/op
+```
+
+From top to bottom are writing time-consuming of non-atomic (and thus unsafe), atomic, and `atomiccounter`.
+It can be seen that in the case of high concurrent writes, `atomiccounter` is only a few times more slower
+than non-atomic writes, but much faster than atomic writes.
 
 <!-- gomarkdoc:embed:start -->
 

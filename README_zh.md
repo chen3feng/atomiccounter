@@ -13,13 +13,35 @@
 [folly](https://github.com/facebook/folly) 里的 [ThreadCachedInt](https://github.com/facebook/folly/blob/main/folly/docs/ThreadCachedInt.md)，
 在高并发写入但是读取很少的应用下，可以提供高达 `sync/atomic` 几十倍的写入性能。
 
-性能压测（每 100 次调用）：
+## 性能压测
+
+每 100 次调用。
+
+在 M1 Pro 芯片的 MacOs 下：
 
 ```console
+goos: darwin
+goarch: arm64
+pkg: github.com/chen3feng/atomiccounter
 BenchmarkNonAtomicAdd-10        47337121                22.14 ns/op
 BenchmarkAtomicAdd-10             180942              6861 ns/op
 BenchmarkCounter-10             14871549                81.02 ns/op
 ```
+
+在 Linux 下：
+
+```console
+goos: linux
+goarch: amd64
+pkg: github.com/chen3feng/atomiccounter
+cpu: Intel(R) Xeon(R) Gold 6133 CPU @ 2.50GHz
+BenchmarkNonAtomicAdd-16    	 9508723	       135.3 ns/op
+BenchmarkAtomicAdd-16       	  582798	      2070 ns/op
+BenchmarkCounter-16         	 4748263	       263.1 ns/op
+```
+
+从上到下，分别是非原子（因而不安全）、原子以及用 `atomiccounter` 的写入耗时结果。可以看出，
+在高并发写入的情况下，`atomiccounter` 仅是非原子写入耗时的几倍，但是却比原子写入快很多。
 
 <!-- gomarkdoc:embed:start -->
 
