@@ -8,7 +8,7 @@ import (
 )
 
 func Example() {
-	counter := atomiccounter.NewInt64()
+	counter := atomiccounter.MakeInt64()
 	var wg sync.WaitGroup
 	for i := 0; i < 100; i++ {
 		wg.Add(1)

@@ -44,7 +44,7 @@ func BenchmarkAtomicAdd(b *testing.B) {
 }
 
 func BenchmarkCounter(b *testing.B) {
-	counter := atomiccounter.NewInt64()
+	counter := atomiccounter.MakeInt64()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			for i := 0; i < batchSize; i++ {
@@ -69,7 +69,7 @@ func BenchmarkAtomicRead(b *testing.B) {
 }
 
 func BenchmarkCounterRead(b *testing.B) {
-	counter := atomiccounter.NewInt64()
+	counter := atomiccounter.MakeInt64()
 	for i := 0; i < b.N; i++ {
 		_ = counter.Read()
 	}

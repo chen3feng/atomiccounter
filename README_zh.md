@@ -54,7 +54,27 @@ BenchmarkAtomicRead-10          1000000000               0.5336 ns/op
 BenchmarkCounterRead-10         54609476                21.20 ns/op
 ```
 
-另外每个 `atomiccounter.Int64` 对象需要消耗 8K 内存，因此请仅用于有大量并发写入但是读取很少的少量场合，比如统计请求次数等。
+因此请仅用于有大量并发写入但是读取很少的少量场合，比如统计请求次数等。
+
+## 实现原理
+
+每个 CPU [cache line size](https://en.wikipedia.org/wiki/CPU_cache#Cache_entries) 倍数大小的 int64 数组成为一个 cell。
+一组 cell 称为一个 chunk。
+
+cell 的大小是按 CPU 的 cache line size 整倍数，并且首位都以 cache line size 大小的空白填充，从而避免了[假共享](https://www.google.com/search?q=%E5%81%87%E5%85%B1%E4%BA%AB)。
+
+cell 中还有个成员变量 `lastIndex` 记录当前 cell 已经被分配给了几个 Int64 对象。
+
+每个 `Int64` 对象包含 2 个成员变量：chunk 指针和 cell 中的下标，因此多个 `Int64` 对象可以共享同一个 chunk，只不过访问的是各个 cell 中不同下标的元素。
+
+最后一次创建的 chunk 的地址记录在全局变量 `lastChunk` 中，当创建 Int64 对象时，增加其 `lastIndex`，如果已经达到了 cell 中 int64 的个数，
+说明本 chunk 已经分配完毕，需要分配一个新的 chunk。
+
+增加 `Int64` 对象的值时，需要先获得其当前所属的的 [M](https://www.google.com/search?q=golang+GMP)，以其地址的 hash，为下标获得 chunk 中相应的 cell。
+再以 `Int64.index` 成员为下标访问此 cell 中 int64 数组。
+由于不同的 M 很大概率上会访问到不同的 cell，因此为了减少不同核之间的竞争。chunk 中 cell 的个数大于一般的核数以减少 hash 冲突的影响。
+
+读取时，遍历累加 chunk 中所有 cell 数组中以 `Int64.index` 为下标的值。
 
 <!-- gomarkdoc:embed:start -->
 
@@ -81,7 +101,7 @@ import (
 )
 
 func main() {
-	counter := atomiccounter.NewInt64()
+	counter := atomiccounter.MakeInt64()
 	var wg sync.WaitGroup
 	for i := 0; i < 100; i++ {
 		wg.Add(1)
@@ -111,7 +131,7 @@ func main() {
 ## Index
 
 - [type Int64](<#type-int64>)
-  - [func NewInt64() *Int64](<#func-newint64>)
+  - [func MakeInt64() Int64](<#func-makeint64>)
   - [func (c *Int64) Add(n int64)](<#func-int64-add>)
   - [func (c *Int64) Inc()](<#func-int64-inc>)
   - [func (c *Int64) Read() int64](<#func-int64-read>)
@@ -119,7 +139,7 @@ func main() {
   - [func (c *Int64) Swap(n int64) int64](<#func-int64-swap>)
 
 
-## type [Int64](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L12-L15>)
+## type [Int64](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L18-L21>)
 
 Int64 is an int64 atomic counter.
 
@@ -129,15 +149,15 @@ type Int64 struct {
 }
 ```
 
-### func [NewInt64](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L22>)
+### func [MakeInt64](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L56>)
 
 ```go
-func NewInt64() *Int64
+func MakeInt64() Int64
 ```
 
-NewInt64 creates a new Int64 object.
+MakeInt64 creates a new Int64 object. Int64 objects must be created by this function, simply initialized doesn't work.
 
-### func \(\*Int64\) [Add](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L27>)
+### func \(\*Int64\) [Add](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L71>)
 
 ```go
 func (c *Int64) Add(n int64)
@@ -145,7 +165,7 @@ func (c *Int64) Add(n int64)
 
 Add adds n to the counter.
 
-### func \(\*Int64\) [Inc](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L33>)
+### func \(\*Int64\) [Inc](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L77>)
 
 ```go
 func (c *Int64) Inc()
@@ -153,15 +173,15 @@ func (c *Int64) Inc()
 
 Inc adds 1 to the counter.
 
-### func \(\*Int64\) [Read](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L45>)
+### func \(\*Int64\) [Read](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L89>)
 
 ```go
 func (c *Int64) Read() int64
 ```
 
-Read return the current value. it is a little slow so it should not be called frequently. Th result is not Guaranteed to be accurate in race conditions.
+Read return the current value. it is a little slow so it should not be called frequently. Th result is not guaranteed to be accurate in race conditions.
 
-### func \(\*Int64\) [Set](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L38>)
+### func \(\*Int64\) [Set](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L82>)
 
 ```go
 func (c *Int64) Set(n int64)
@@ -169,7 +189,7 @@ func (c *Int64) Set(n int64)
 
 Set set the value of the counter to n.
 
-### func \(\*Int64\) [Swap](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L55>)
+### func \(\*Int64\) [Swap](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L99>)
 
 ```go
 func (c *Int64) Swap(n int64) int64
