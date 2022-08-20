@@ -52,9 +52,9 @@ But it is much slower reads:
 goos: darwin
 goarch: arm64
 pkg: github.com/chen3feng/atomiccounter
-BenchmarkNonAtomicRead-10       1000000000               0.3156 ns/op
-BenchmarkAtomicRead-10          1000000000               0.5341 ns/op
-BenchmarkCounterRead-10         31195975                36.11 ns/op
+BenchmarkNonAtomicRead-10       1000000000               0.3112 ns/op
+BenchmarkAtomicRead-10          1000000000               0.5336 ns/op
+BenchmarkCounterRead-10         54609476                21.20 ns/op
 ```
 
 In addition, each `atomiccounter.Int64` object needs to consume 8K memory, so please only use it in a small number of
@@ -96,9 +96,9 @@ func main() {
 
 	}
 	wg.Wait()
-	fmt.Println(counter.Load())
+	fmt.Println(counter.Read())
 	counter.Set(0)
-	fmt.Println(counter.Load())
+	fmt.Println(counter.Read())
 }
 ```
 
@@ -118,7 +118,7 @@ func main() {
   - [func NewInt64() *Int64](<#func-newint64>)
   - [func (c *Int64) Add(n int64)](<#func-int64-add>)
   - [func (c *Int64) Inc()](<#func-int64-inc>)
-  - [func (c *Int64) Load() int64](<#func-int64-load>)
+  - [func (c *Int64) Read() int64](<#func-int64-read>)
   - [func (c *Int64) Set(n int64)](<#func-int64-set>)
   - [func (c *Int64) Swap(n int64) int64](<#func-int64-swap>)
 
@@ -157,13 +157,13 @@ func (c *Int64) Inc()
 
 Inc adds 1 to the counter.
 
-### func \(\*Int64\) [Load](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L43>)
+### func \(\*Int64\) [Read](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L45>)
 
 ```go
-func (c *Int64) Load() int64
+func (c *Int64) Read() int64
 ```
 
-Load return the current value.
+Read return the current value. it is a little slow so it should not be called frequently. Th result is not Guaranteed to be accurate in race conditions.
 
 ### func \(\*Int64\) [Set](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L38>)
 
@@ -173,7 +173,7 @@ func (c *Int64) Set(n int64)
 
 Set set the value of the counter to n.
 
-### func \(\*Int64\) [Swap](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L52>)
+### func \(\*Int64\) [Swap](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L55>)
 
 ```go
 func (c *Int64) Swap(n int64) int64

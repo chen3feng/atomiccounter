@@ -7,6 +7,7 @@ import (
 	"github.com/chen3feng/atomiccounter"
 )
 
+//go:norace
 //go:noinline
 func add(count *int64, n int) {
 	for i := 0; i < n; i++ {

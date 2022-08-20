@@ -39,11 +39,14 @@ func (c *Int64) Set(n int64) {
 	c.Swap(n)
 }
 
-// Read return the current value.
+// Read return the current value. it is a little slow so it should not be called frequently.
+// Th result is not Guaranteed to be accurate in race conditions.
+//go:norace
 func (c *Int64) Read() int64 {
 	total := int64(0)
 	for i := range c.cells {
-		total += atomic.LoadInt64(&c.cells[i].n[0])
+		//total += atomic.LoadInt64(&c.cells[i].n[0])
+		total += c.cells[i].n[0]
 	}
 	return total
 }
