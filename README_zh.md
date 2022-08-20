@@ -31,19 +31,62 @@ BenchmarkCounter-10             14871549                81.02 ns/op
 import "github.com/chen3feng/atomiccounter"
 ```
 
+Package atomiccounter provides an atomic counter for high throughput concurrent writing and rare reading scenario.
+
+<details><summary>Example</summary>
+<p>
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/chen3feng/atomiccounter"
+	"sync"
+)
+
+func main() {
+	counter := atomiccounter.NewInt64()
+	var wg sync.WaitGroup
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
+		go func() {
+			counter.Inc()
+			wg.Done()
+		}()
+
+	}
+	wg.Wait()
+	fmt.Println(counter.Load())
+	counter.Set(0)
+	fmt.Println(counter.Load())
+}
+```
+
+#### Output
+
+```
+100
+0
+```
+
+</p>
+</details>
+
 ## Index
 
 - [type Int64](<#type-int64>)
   - [func NewInt64() *Int64](<#func-newint64>)
-  - [func (c *Int64) Add(i int64)](<#func-int64-add>)
-  - [func (c *Int64) Clear(i int64)](<#func-int64-clear>)
-  - [func (c *Int64) Inc(i int64)](<#func-int64-inc>)
+  - [func (c *Int64) Add(n int64)](<#func-int64-add>)
+  - [func (c *Int64) Inc()](<#func-int64-inc>)
   - [func (c *Int64) Load() int64](<#func-int64-load>)
   - [func (c *Int64) Set(n int64)](<#func-int64-set>)
   - [func (c *Int64) Swap(n int64) int64](<#func-int64-swap>)
 
 
-## type [Int64](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L11-L18>)
+## type [Int64](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L12-L15>)
+
+Int64 is an int64 atomic counter.
 
 ```go
 type Int64 struct {
@@ -51,31 +94,31 @@ type Int64 struct {
 }
 ```
 
-### func [NewInt64](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L20>)
+### func [NewInt64](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L22>)
 
 ```go
 func NewInt64() *Int64
 ```
 
-### func \(\*Int64\) [Add](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L24>)
+NewInt64 creates a new Int64 object.
+
+### func \(\*Int64\) [Add](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L27>)
 
 ```go
-func (c *Int64) Add(i int64)
+func (c *Int64) Add(n int64)
 ```
 
-### func \(\*Int64\) [Clear](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L45>)
+Add adds n to the counter.
+
+### func \(\*Int64\) [Inc](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L33>)
 
 ```go
-func (c *Int64) Clear(i int64)
+func (c *Int64) Inc()
 ```
 
-### func \(\*Int64\) [Inc](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L34>)
+Inc adds 1 to the counter.
 
-```go
-func (c *Int64) Inc(i int64)
-```
-
-### func \(\*Int64\) [Load](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L50>)
+### func \(\*Int64\) [Load](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L43>)
 
 ```go
 func (c *Int64) Load() int64
@@ -89,7 +132,9 @@ Load return the current value.
 func (c *Int64) Set(n int64)
 ```
 
-### func \(\*Int64\) [Swap](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L59>)
+Set set the value of the counter to n.
+
+### func \(\*Int64\) [Swap](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L52>)
 
 ```go
 func (c *Int64) Swap(n int64) int64

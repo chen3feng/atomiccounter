@@ -33,6 +33,8 @@ BenchmarkCounter-10             14871549                81.02 ns/op
 import "github.com/chen3feng/atomiccounter"
 ```
 
+Package atomiccounter provides an atomic counter for high throughput concurrent writing and rare reading scenario.
+
 <details><summary>Example</summary>
 <p>
 
