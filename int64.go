@@ -39,8 +39,8 @@ func (c *Int64) Set(n int64) {
 	c.Swap(n)
 }
 
-// Load return the current value.
-func (c *Int64) Load() int64 {
+// Read return the current value.
+func (c *Int64) Read() int64 {
 	total := int64(0)
 	for i := range c.cells {
 		total += atomic.LoadInt64(&c.cells[i].n[0])
@@ -50,9 +50,9 @@ func (c *Int64) Load() int64 {
 
 // Swap returns the current value and swap it with n.
 func (c *Int64) Swap(n int64) int64 {
-	total := int64(0)
-	for i := range c.cells {
-		total += atomic.SwapInt64(&c.cells[i].n[0], 0)
+	total := atomic.SwapInt64(&c.cells[0].n[0], n)
+	for i := range c.cells[1:] {
+		total += atomic.SwapInt64(&c.cells[i+1].n[0], 0)
 	}
 	return total
 }

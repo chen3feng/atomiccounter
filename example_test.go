@@ -19,9 +19,9 @@ func Example() {
 
 	}
 	wg.Wait()
-	fmt.Println(counter.Load())
+	fmt.Println(counter.Read())
 	counter.Set(0)
-	fmt.Println(counter.Load())
+	fmt.Println(counter.Read())
 	// Output:
 	// 100
 	// 0

@@ -70,6 +70,6 @@ func BenchmarkAtomicRead(b *testing.B) {
 func BenchmarkCounterRead(b *testing.B) {
 	counter := atomiccounter.NewInt64()
 	for i := 0; i < b.N; i++ {
-		_ = counter.Load()
+		_ = counter.Read()
 	}
 }
