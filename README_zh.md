@@ -58,6 +58,16 @@ BenchmarkCounterRead-10         54609476                21.20 ns/op
 
 ## 实现原理
 
+竞争是多核程序中最大的性能杀手之一。对于大量写入的计数器，如果用普通的 atomic，会严重影响性能。
+在读取很少的场景下，一种常用的解决方案是把写入分散到不同的变量中，读取时再累加。采用这种方法的有
+Java 的 LongAdder 和 folly ThreadCachedInt，以及 Linux 内核中的 per-cpu。虽然实现方式不同，但是思路是相似的。
+
+目前在 go 中还没有搜到比较出名的满足这种类用途的实现，因此我实现了这个库。
+
+为了减少内存占用，还让多个 `Int64` 对象可以共享因 cache line 对齐而浪费的存储空间。
+
+### 内存布局
+
 每个 CPU [cache line size](https://en.wikipedia.org/wiki/CPU_cache#Cache_entries) 倍数大小的 int64 数组成为一个 cell。
 一组 cell 称为一个 chunk。
 
@@ -67,12 +77,23 @@ cell 中还有个成员变量 `lastIndex` 记录当前 cell 已经被分配给�
 
 每个 `Int64` 对象包含 2 个成员变量：chunk 指针和 cell 中的下标，因此多个 `Int64` 对象可以共享同一个 chunk，只不过访问的是各个 cell 中不同下标的元素。
 
+### 分配 Int64 对象
+
 最后一次创建的 chunk 的地址记录在全局变量 `lastChunk` 中，当创建 Int64 对象时，增加其 `lastIndex`，如果已经达到了 cell 中 int64 的个数，
 说明本 chunk 已经分配完毕，需要分配一个新的 chunk。
 
-增加 `Int64` 对象的值时，需要先获得其当前所属的的 [M](https://www.google.com/search?q=golang+GMP)，以其地址的 hash，为下标获得 chunk 中相应的 cell。
+### 访问 Int64 对象
+
+请先了解 Go 的[GMP](https://www.google.com/search?q=golang+GMP) 调度模型。
+
+性能最好的方式是在 Go 中获得当前的 `M` 的下标，直接访问相应的 `cell`，这样不同的 `M` 之间完全不会有冲突，甚至可以避免使用原子运算。
+但是我目前没找到这样获得 `M` 下标的方法。
+
+因此本实现采用了以 `M` 的地址的 hash 做下标来访问 cell 的方式，实测效果也不错。
+只要让每个 chunk 中 cell 的个数大于一般的常见的 CPU 核数，就能减少 hash 冲突的影响，使得不同的 M 很大概率上会访问到不同的 cell。
+
+增加 `Int64` 对象的值时，需要先获得其当前所属的的 `M`，以其地址的 hash，为下标获得 chunk 中相应的 cell。
 再以 `Int64.index` 成员为下标访问此 cell 中 int64 数组。
-由于不同的 M 很大概率上会访问到不同的 cell，因此为了减少不同核之间的竞争。chunk 中 cell 的个数大于一般的核数以减少 hash 冲突的影响。
 
 读取时，遍历累加 chunk 中所有 cell 数组中以 `Int64.index` 为下标的值。
 

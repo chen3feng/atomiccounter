@@ -62,6 +62,19 @@ scenarios with a large number of concurrent writes but few reads, such as counti
 
 ## Implementation
 
+Data race is one of the biggest performance killers in multi-core programs. For counters with a large number of writes,
+if ordinary atomic is used, the performance will be severely affected.
+
+In scenarios with few reads, a common solution is to spread the writes across different variables and accumulate them when they are read.
+Such as Java's LongAdder and folly ThreadCachedInt, and per-cpu in the Linux kernel are all used this this method.
+Although the implementation details are different, the idea is similar.
+
+At present, there is no well-known implementation for this kind of purpose in go, so I implemented this library.
+
+To reduce memory footprint, multiple `Int64` objects may share same memory chunk.
+
+### Memory Layout
+
 An int64 array of multiple sizes of CPU [cache line size](https://en.wikipedia.org/wiki/CPU_cache#Cache_entries) becomes a cell.
 A group of cells is called a chunk.
 
@@ -73,19 +86,33 @@ The `chunk.lastIndex` member is used to record the last unused index for allocat
 Each `Int64` object contains 2 fields: the chunk pointer and the index in the cell, so multiple `Int64` objects can share the same chunk,
 but access elements with different indices in each cell.
 
+### Allocate an `Int64` object
+
 The address of the last created chunk is recorded in the global variable `lastChunk`. When an `Int64` object is created,
 its `lastIndex` is increased. If it reachs the number of int64 in the cell,
 it means that this chunk has been totally allocated and a new chunk needs to be created.
 
-When adding the value of an `Int64` object, a hash number is calculated with the address of current [M](https://www.google.com/search?q=golang+GMP),
-it is used to index the corresponding cell in the chunk.
+### Access an `Int64` object
 
-Then use the `Int64.index` member as a index to access the int64 array in this cell.
+Please first understand Go's [GMP](https://www.google.com/search?q=golang+GMP) scheduling model.
 
-So different `M` will access different cell with a high probability. In order to reduce the competition between different cores,
-the number of cells in a chunk is larger than the usual number of CPU cores to reduce the impact of hash collisions.
+The best performance is to get the current subscript of `M` in Go and directly access the corresponding `cell`,
+so that there will be no conflict between different `M`s, and even avoid using atomic operations.
 
-When reading, traverse the value indexed by `Int64.index` in all cell arrays in the accumulated chunk.
+But I haven't found a way to get the `M`'s subscript.
+
+Therefore, this implementation uses the hash of the address of `M` as the subscript to access the cell,
+and the measured effect is also quite good.
+
+As long as the number of cells in each chunk is larger than the common number of CPU cores,
+the impact of hash collisions can be reduced, so that different M will have a high probability
+of accessing different cells.
+
+When increasing the value of an `Int64` object, the hash of current `M`'s' address is used as the
+subscript to obtain the corresponding cell in the chunk.
+Then use the `Int64.index` member as a subscript to access the int64 array in this cell.
+
+When reading, traverse the value indexed by `Int64.index` in all cell arrays and accumulated the value.
 
 <!-- gomarkdoc:embed:start -->
 
