@@ -54,7 +54,7 @@ BenchmarkAtomicRead-10          1000000000               0.5341 ns/op
 BenchmarkCounterRead-10         31195975                36.11 ns/op
 ```
 
-另外每个 atomiccounter.Int64 对象需要消耗 8K 内存，因此请仅用于有大量并发写入但是读取很少的少量场合，比如统计请求次数等。
+另外每个 `atomiccounter.Int64` 对象需要消耗 8K 内存，因此请仅用于有大量并发写入但是读取很少的少量场合，比如统计请求次数等。
 
 <!-- gomarkdoc:embed:start -->
 

@@ -57,7 +57,7 @@ BenchmarkAtomicRead-10          1000000000               0.5341 ns/op
 BenchmarkCounterRead-10         31195975                36.11 ns/op
 ```
 
-In addition, each atomiccounter.Int64 object needs to consume 8K memory, so please only use it in a small number of
+In addition, each `atomiccounter.Int64` object needs to consume 8K memory, so please only use it in a small number of
 scenarios with a large number of concurrent writes but few reads, such as counting the number of requests.
 
 <!-- gomarkdoc:embed:start -->
