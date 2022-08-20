@@ -1,6 +1,18 @@
 # atomiccounter
 
+English | [简体中文](README_zh.md)
+
+[![License Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-red.svg)](COPYING)
+[![Golang](https://img.shields.io/badge/Language-go1.18+-blue.svg)](https://go.dev/)
+![Build Status](https://github.com/chen3feng/atomiccounter/actions/workflows/go.yml/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/chen3feng/atomiccounter/badge.svg?branch=master)](https://coveralls.io/github/chen3feng/atomiccounter?branch=master)
+[![GoReport](https://goreportcard.com/badge/github.com/securego/gosec)](https://goreportcard.com/report/github.com/chen3feng/atomiccounter)
+
 A High Performance Atomic Counter for Concurrent Write-More-Read-Less Scenario in Go.
+
+Similar to [LongAdder](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/atomic/LongAdder.html) in Java, or
+[ThreadCachedInt](https://github.com/facebook/folly/blob/main/folly/docs/ThreadCachedInt.md) in [folly](https://github.com/facebook/folly),
+In scenarios of high concurrent writes but few reads, it can provide dozens of times the write performance than `sync/atomic`.
 
 Benchmark(per 100 calls):
 

@@ -1,6 +1,16 @@
 # atomiccounter -- 高并发写入性能的计数器
 
-本库实现了一个针对高并发写入进行性能优化的计数器。
+[English](README.md) | 简体中文
+
+[![License Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-red.svg)](COPYING)
+[![Golang](https://img.shields.io/badge/Language-go1.18+-blue.svg)](https://go.dev/)
+![Build Status](https://github.com/chen3feng/atomiccounter/actions/workflows/go.yml/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/chen3feng/atomiccounter/badge.svg?branch=master)](https://coveralls.io/github/chen3feng/atomiccounter?branch=master)
+[![GoReport](https://goreportcard.com/badge/github.com/securego/gosec)](https://goreportcard.com/report/github.com/chen3feng/atomiccounter)
+
+本库实现了一个针对高并发写入进行性能优化的计数器。类似于 Java 里的 [LongAdder](https://segmentfault.com/a/1190000023761290)，
+[folly](https://github.com/facebook/folly) 里的 [ThreadCachedInt](https://github.com/facebook/folly/blob/main/folly/docs/ThreadCachedInt.md)，
+在高并发写入但是读取很少的应用下，可以提供高达 `sync/atomic` 几十倍的写入性能。
 
 性能压测（每 100 次调用）：
 
