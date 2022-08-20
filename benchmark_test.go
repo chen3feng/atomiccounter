@@ -52,3 +52,24 @@ func BenchmarkCounter(b *testing.B) {
 		}
 	})
 }
+
+func BenchmarkNonAtomicRead(b *testing.B) {
+	count := int64(0)
+	for i := 0; i < b.N; i++ {
+		_ = count
+	}
+}
+
+func BenchmarkAtomicRead(b *testing.B) {
+	count := int64(0)
+	for i := 0; i < b.N; i++ {
+		_ = atomic.LoadInt64(&count)
+	}
+}
+
+func BenchmarkCounterRead(b *testing.B) {
+	counter := atomiccounter.NewInt64()
+	for i := 0; i < b.N; i++ {
+		_ = counter.Load()
+	}
+}
