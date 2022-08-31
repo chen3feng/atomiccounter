@@ -36,7 +36,7 @@ goarch: amd64
 pkg: github.com/chen3feng/atomiccounter
 cpu: Intel(R) Xeon(R) Gold 6133 CPU @ 2.50GHz
 BenchmarkNonAtomicAdd-16    	 9508723	       135.3 ns/op
-BenchmarkAtomicAdd-16       	  582798	      2070 ns/op
+BenchmarkAtomicAdd-16       	  582798	        2070 ns/op
 BenchmarkCounter-16         	 4748263	       263.1 ns/op
 ```
 
@@ -51,7 +51,7 @@ goarch: arm64
 pkg: github.com/chen3feng/atomiccounter
 BenchmarkNonAtomicRead-10       1000000000               0.3112 ns/op
 BenchmarkAtomicRead-10          1000000000               0.5336 ns/op
-BenchmarkCounterRead-10         54609476                21.20 ns/op
+BenchmarkCounterRead-10         54609476                  21.20 ns/op
 ```
 
 因此请仅用于有大量并发写入但是读取很少的少量场合，比如统计请求次数等。
