@@ -24,7 +24,7 @@ goos: darwin
 goarch: arm64
 pkg: github.com/chen3feng/atomiccounter
 BenchmarkNonAtomicAdd-10        47337121                22.14 ns/op
-BenchmarkAtomicAdd-10             180942              6861 ns/op
+BenchmarkAtomicAdd-10             180942                 6861 ns/op
 BenchmarkCounter-10             14871549                81.02 ns/op
 ```
 
