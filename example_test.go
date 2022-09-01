@@ -22,7 +22,10 @@ func Example() {
 	fmt.Println(counter.Read())
 	counter.Set(0)
 	fmt.Println(counter.Read())
+	counter.Add(10)
+	fmt.Println(counter.Read())
 	// Output:
 	// 100
 	// 0
+	// 10
 }

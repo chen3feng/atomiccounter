@@ -136,6 +136,8 @@ func main() {
 	fmt.Println(counter.Read())
 	counter.Set(0)
 	fmt.Println(counter.Read())
+	counter.Add(10)
+	fmt.Println(counter.Read())
 }
 ```
 
@@ -144,6 +146,7 @@ func main() {
 ```
 100
 0
+10
 ```
 
 </p>
@@ -160,7 +163,7 @@ func main() {
   - [func (c *Int64) Swap(n int64) int64](<#func-int64-swap>)
 
 
-## type [Int64](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L18-L21>)
+## type [Int64](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L19-L22>)
 
 Int64 is an int64 atomic counter.
 
@@ -170,7 +173,7 @@ type Int64 struct {
 }
 ```
 
-### func [MakeInt64](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L56>)
+### func [MakeInt64](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L57>)
 
 ```go
 func MakeInt64() Int64
@@ -178,7 +181,7 @@ func MakeInt64() Int64
 
 MakeInt64 creates a new Int64 object. Int64 objects must be created by this function, simply initialized doesn't work.
 
-### func \(\*Int64\) [Add](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L71>)
+### func \(\*Int64\) [Add](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L72>)
 
 ```go
 func (c *Int64) Add(n int64)
@@ -186,7 +189,7 @@ func (c *Int64) Add(n int64)
 
 Add adds n to the counter.
 
-### func \(\*Int64\) [Inc](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L77>)
+### func \(\*Int64\) [Inc](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L78>)
 
 ```go
 func (c *Int64) Inc()
@@ -194,7 +197,7 @@ func (c *Int64) Inc()
 
 Inc adds 1 to the counter.
 
-### func \(\*Int64\) [Read](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L89>)
+### func \(\*Int64\) [Read](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L91>)
 
 ```go
 func (c *Int64) Read() int64
@@ -202,7 +205,7 @@ func (c *Int64) Read() int64
 
 Read return the current value. it is a little slow so it should not be called frequently. Th result is not guaranteed to be accurate in race conditions.
 
-### func \(\*Int64\) [Set](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L82>)
+### func \(\*Int64\) [Set](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L83>)
 
 ```go
 func (c *Int64) Set(n int64)
@@ -210,7 +213,7 @@ func (c *Int64) Set(n int64)
 
 Set set the value of the counter to n.
 
-### func \(\*Int64\) [Swap](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L99>)
+### func \(\*Int64\) [Swap](<https://github.com/chen3feng/atomiccounter/blob/master/int64.go#L101>)
 
 ```go
 func (c *Int64) Swap(n int64) int64

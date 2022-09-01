@@ -11,6 +11,7 @@ const (
 	// Number of cells in each chunk. the size is larger than usual CPU cores to reduce hash conflict.
 	numChunkCells = 64
 	// Number of int64s in each cell. there are 2 pad fields, it should not be too small to avoid waste memory.
+	// #nosec G103
 	cellCapacity = 6 * unsafe.Sizeof(cpu.CacheLinePad{}) / 8
 )
 
@@ -85,6 +86,7 @@ func (c *Int64) Set(n int64) {
 
 // Read return the current value. it is a little slow so it should not be called frequently.
 // Th result is not guaranteed to be accurate in race conditions.
+//
 //go:norace
 func (c *Int64) Read() int64 {
 	total := int64(0)
