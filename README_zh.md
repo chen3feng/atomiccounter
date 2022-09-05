@@ -56,6 +56,36 @@ BenchmarkCounterRead-10         54609476                  21.20 ns/op
 
 因此请仅用于有大量并发写入但是读取很少的少量场合，比如统计请求次数等。
 
+## 和其他库比较
+
+在 GitHub 上找到了三个类似的库，其中后两个看起来是实现是一样的：
+
+- https://github.com/puzpuzpuz/xsync
+- https://github.com/linxGnu/go-adder
+- https://github.com/line/garr
+
+做了 Benchmark，Apple M1 Pro 上结果如下：
+
+```console
+BenchmarkAdd_NonAtomic-10               49337793                22.02 ns/op
+BenchmarkAdd_Atomic-10                    206678                 6854 ns/op
+BenchmarkAdd_AtomicCounter-10           14658782                82.22 ns/op
+BenchmarkAdd_XsyncCounter-10             9599529                144.6 ns/op
+BenchmarkAdd_GoAdder-10                   825858                 1339 ns/op
+BenchmarkAdd_GarrAdder-10                 915090                 1305 ns/op
+
+BenchmarkRead_NonAtomic-10             263460258                4.087 ns/op
+BenchmarkRead_Atomic-10                172530186                6.945 ns/op
+BenchmarkRead_AtomicCounter-10           2793618                425.2 ns/op
+BenchmarkRead_XSyncCounter-10            2396407                489.6 ns/op
+BenchmarkRead_GoAdder-10                32101244                36.02 ns/op
+BenchmarkRead_GarrAdder-10              29420326                35.40 ns/op
+```
+
+显然，`atomiccounter` 的并发写入速度是最快的。
+
+详情参见测试源代码 [atomiccounter_bench](https://github.com/chen3feng/atomiccounter_bench)。
+
 ## 实现原理
 
 竞争是多核程序中最大的性能杀手之一。对于大量写入的计数器，如果用普通的 atomic，会严重影响性能。

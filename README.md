@@ -60,6 +60,36 @@ BenchmarkCounterRead-10         54609476                  21.20 ns/op
 In addition, each `atomiccounter.Int64` object needs to consume 8K memory, so please only use it in a small number of
 scenarios with a large number of concurrent writes but few reads, such as counting the number of requests.
 
+## Compare with Similar Libraries
+
+I found 3 similar Libraries in GitHub (the later 2 seems same):
+
+- https://github.com/puzpuzpuz/xsync
+- https://github.com/linxGnu/go-adder
+- https://github.com/line/garr
+
+And got the following benchmark result under the Apple M1 Pro chip.
+
+```console
+BenchmarkAdd_NonAtomic-10               49337793                22.02 ns/op
+BenchmarkAdd_Atomic-10                    206678                 6854 ns/op
+BenchmarkAdd_AtomicCounter-10           14658782                82.22 ns/op
+BenchmarkAdd_XsyncCounter-10             9599529                144.6 ns/op
+BenchmarkAdd_GoAdder-10                   825858                 1339 ns/op
+BenchmarkAdd_GarrAdder-10                 915090                 1305 ns/op
+
+BenchmarkRead_NonAtomic-10             263460258                4.087 ns/op
+BenchmarkRead_Atomic-10                172530186                6.945 ns/op
+BenchmarkRead_AtomicCounter-10           2793618                425.2 ns/op
+BenchmarkRead_XSyncCounter-10            2396407                489.6 ns/op
+BenchmarkRead_GoAdder-10                32101244                36.02 ns/op
+BenchmarkRead_GarrAdder-10              29420326                35.40 ns/op
+```
+
+Obviously, `atomiccounter` is the fastest for concurrent writing.
+
+See [atomiccounter_bench](https://github.com/chen3feng/atomiccounter_bench) for source code.
+
 ## Implementation
 
 Data race is one of the biggest performance killers in multi-core programs. For counters with a large number of writes,
